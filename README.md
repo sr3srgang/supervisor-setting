@@ -1,7 +1,7 @@
 # supervisor-setting
 
 ## Linux
-1. Copy `supervisord.conf.linux` as `supervisord.conf`.
+1. Download `linux/supervisord.conf`.
 2. Change the root folder path in the paths accross the lines in the file accordingly. e.g., keep `/etc/supervisor/` if the supervisor was installed via `sudo apt install supervisor` 
 3. Make sure the necessary subfolders in the root folder:
     - `conf.d`
@@ -21,3 +21,35 @@
         CGroup: /system.slice/supervisor.service
                 └─3156573 python ./main.py
     ```
+
+```
+conda create -n supervisor python=3.11 supervisor
+```
+
+As of 2025/04/07 supervisor-4.2.5 is installed.
+
+Download/create/copy the files and folders in `./etc/` folder in the system's `/etc/` folder accordingly.
+cf. the `.service` files for default, system-wide services (including `supervisord` installed by `apt`) are in `/lib/systemd/system/` and the custom services in `/etc/systemd/system/` override the system-wide services.
+
+Open `supervisor.service` and replace the `<path to conda env>` placeholders with the actual path that can be found from `conda env list`.
+
+Change group to `users` and give read, write & file create group permissions of `/etc/supervisor/ and its subfile/folders to edit with `users` (e.g., through SSH or vscode tunnel). 
+```
+sudo mkdir /etc/supervisor
+sudo chown -R :users /etc/supervisor
+sudo chmod -R g+rwx /etc/supervisor
+```
+Verify the change
+```
+<host>:/etc$ ls -l /etc | grep supervisor
+drwxrwxr--  2 root                 users                 4096 Apr  7 16:57 supervisor
+```
+
+Then uncomment the below lines to connect the supervisor to multivisor
+```
+[rpcinterface:multivisor]
+supervisor.rpcinterface_factory = multivisor.rpc:make_rpc_interface
+bind=*:9002
+```
+
+Use `/workspaces/supervisor-setting/linux/etc/supervisor/conf.d/template.conf.template` to create `.conf` files in the same folder for programs managed by supervisor.
