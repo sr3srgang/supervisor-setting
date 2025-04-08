@@ -22,7 +22,7 @@
                 └─3156573 python ./main.py
     ```
 
-```
+```bash
 conda create -n supervisor python=3.11 supervisor
 ```
 
@@ -33,23 +33,33 @@ cf. the `.service` files for default, system-wide services (including `superviso
 
 Open `supervisor.service` and replace the `<path to conda env>` placeholders with the actual path that can be found from `conda env list`.
 
-Change group to `users` and give read, write & file create group permissions of `/etc/supervisor/ and its subfile/folders to edit with `users` (e.g., through SSH or vscode tunnel). 
+Make symlink for `supervisorctl` in conda to the local `PATH` (to run `supervisorctl` just by typing so):
+```bash
+sudo ln -s /home/username/miniconda3/envs/myenv/bin/supervisorctl /usr/local/bin/supervisorctl
 ```
+
+Change group to `users` and give read, write & file create group permissions of `/etc/supervisor/ and its subfile/folders to edit with `users` (e.g., through SSH or vscode tunnel). 
+```bash
 sudo mkdir /etc/supervisor
 sudo chown -R :users /etc/supervisor
 sudo chmod -R g+rwx /etc/supervisor
 ```
 Verify the change
-```
+```bash
 <host>:/etc$ ls -l /etc | grep supervisor
 drwxrwxr--  2 root                 users                 4096 Apr  7 16:57 supervisor
 ```
 
 Then uncomment the below lines to connect the supervisor to multivisor
-```
+```bash
 [rpcinterface:multivisor]
 supervisor.rpcinterface_factory = multivisor.rpc:make_rpc_interface
 bind=*:9002
 ```
 
 Use `/workspaces/supervisor-setting/linux/etc/supervisor/conf.d/template.conf.template` to create `.conf` files in the same folder for programs managed by supervisor.
+
+
+
+## Windows
+place the `supervisor` folder in `C:\supervisor`
